@@ -1,35 +1,125 @@
-import 'package:cross_math/models/board.dart';
 import 'package:cross_math/models/game.dart';
 import 'package:cross_math/models/tile.dart';
 import 'package:flutter/material.dart';
 
 class BoardView extends StatefulWidget {
-  final Game game;
-  const BoardView({Key? key, required this.game}) : super(key: key);
+  const BoardView({Key? key}) : super(key: key);
 
   @override
   _BoardState createState() => _BoardState();
 }
 
 class _BoardState extends State<BoardView> {
-  late Game game = widget.game;
-
-  late Board board = Board(game: game);
-  late List<int> rowUserTotals = [
-    ...board.rowTiles.map((l) => l.map((t) => t.outputValue ?? 0).reduce((a, b) => a + b))
+  late Game game = Game();
+  late List<int> blanks = game.blankIndexes();
+  late List<Tile> tiles = [
+    for (int i = 0; i < game.tileCount; i++) Tile(Game.rng(), index: i, isBlank: blanks.contains(i))
   ];
+  bool showHints = false;
+
+  late List<List<Tile>> rows = getRowsFromTiles();
+  late List<List<Tile>> cols = getColsFromTiles();
+
+  late List<int> rowTotals = [...rows.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
+  late List<int> colTotals = [...cols.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
+  late List<int> rowSolutions = [...rows.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
+  late List<int> colSolutions = [...cols.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
+
+  // List<int> getRowSolutions() {
+  //   return [...rows.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
+  // }
+
+  // List<int> getColSolutions() {
+  //   return [...cols.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
+  // }
+
+  // List<int> getRowTotals() {
+  //   return [...rows.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
+  // }
+
+  // List<int> getColTotals() {
+  //   return [...cols.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
+  // }
+
+  List<List<Tile>> getRowsFromTiles() {
+    List<List<Tile>> output = [];
+    int o = 0;
+    while (o < game.tileCount) {
+      List<Tile> row = [];
+      for (int i = 0; i < game.boardSize; i++) {
+        row.add(tiles[o]);
+        o++;
+      }
+      output.add(row);
+    }
+    return output;
+  }
+
+  List<List<Tile>> getColsFromTiles() {
+    List<List<Tile>> output = [];
+    for (int i = 0; i < game.boardSize; i++) {
+      List<Tile> col = [];
+      for (int j = 0; j < game.tileCount; j += game.boardSize) {
+        col.add(tiles[j + i]);
+      }
+      output.add(col);
+    }
+    return output;
+  }
 
   Widget _row([int offset = 0]) {
     List<Widget> cards = [];
     for (int i = 0; i < game.boardSize; i++) {
-      cards.add(_tile(board.tiles[offset + i]));
+      cards.add(tileWidget(tiles[offset + i]));
     }
     return Row(
       children: cards,
     );
   }
 
-  Widget _card(int i, [int? u]) {
+  Widget tileWidget(Tile tile) {
+    return SizedBox(
+      width: 100,
+      height: 100,
+      child: Card(
+        margin: const EdgeInsets.all(8),
+        child: Center(
+          child: !tile.isBlank
+              ? Text(
+                  tile.solutionValue.toString(),
+                  style: Theme.of(context).textTheme.headline3,
+                )
+              : TextField(
+                  controller: tile.controller,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headline3,
+                  onChanged: (s) {
+                    setState(() {
+                      tiles[tile.index].outputValue = int.tryParse(s) ?? 0;
+                      cols = getColsFromTiles();
+                      rows = getRowsFromTiles();
+                      rowTotals = [...rows.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
+                      colTotals = [...cols.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
+                      rowSolutions = [...rows.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
+                      colSolutions = [...cols.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
+                    });
+                  },
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget blankTile() {
+    return const SizedBox(
+      width: 100,
+      height: 100,
+    );
+  }
+
+  Widget solutionTile(int solution) {
+    TextStyle textStyle = Theme.of(context).textTheme.headline3!;
+
     return SizedBox(
       width: 100,
       height: 100,
@@ -37,56 +127,36 @@ class _BoardState extends State<BoardView> {
         margin: const EdgeInsets.all(8),
         child: Center(
           child: Text(
-            i.toString(),
-            // style: Theme.of(context).textTheme.headline3,
-            style: i != u ? Theme.of(context).textTheme.headline3 : Theme.of(context).textTheme.headline2,
+            solution.toString(),
+            style: textStyle,
           ),
         ),
       ),
     );
   }
 
-  Widget _tile(Tile t) {
+  Widget answerTile(int solution, int guess) {
+    TextStyle textStyle = Theme.of(context).textTheme.headline3!;
+
+    textStyle = textStyle.apply(
+        color: guess == solution
+            ? Colors.green
+            : guess < solution
+                ? Colors.amber
+                : Colors.red);
+
     return SizedBox(
       width: 100,
       height: 100,
       child: Card(
         margin: const EdgeInsets.all(8),
         child: Center(
-          child: t.isEditable
-              ? Text(
-                  t.solutionValue.toString(),
-                  style: Theme.of(context).textTheme.headline3,
-                )
-              : TextField(
-                  controller: t.controller,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headline3,
-                  onTap: () {
-                    print(t.solutionValue);
-                  },
-                  onChanged: (s) => print(rowUserTotals),
-                ),
+          child: Text(
+            guess.toString(),
+            style: textStyle,
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _topSums() {
-    List<Widget> cards = [...board.colTotals.map((i) => _card(i))];
-    cards.add(_card(0));
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: cards,
-    );
-  }
-
-  Widget _sideSums() {
-    print(rowUserTotals);
-    List<Widget> cards = [...board.rowTotals.map((i) => _card(i, i))];
-
-    return Column(
-      children: cards,
     );
   }
 
@@ -97,6 +167,58 @@ class _BoardState extends State<BoardView> {
     );
   }
 
+  Widget _sideSums() {
+    return Column(
+      children: [for (int sum in rowSolutions) solutionTile(sum)],
+    );
+  }
+
+  Widget _topSums() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [for (int sum in colSolutions) solutionTile(sum)],
+    );
+  }
+
+  Widget _userSideSums() {
+    List<Widget> kids = [];
+    for (int i = 0; i < rows.length; i++) {
+      kids.add(showHints ? answerTile(rowSolutions[i], rowTotals[i]) : blankTile());
+    }
+    return Column(
+      children: kids,
+    );
+  }
+
+  Widget _userBottomSums() {
+    List<Widget> kids = [];
+    for (int i = 0; i < rows.length; i++) {
+      kids.add(showHints ? answerTile(colSolutions[i], colTotals[i]) : blankTile());
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        blankTile(),
+        ...kids,
+        blankTile(),
+      ],
+    );
+  }
+
+  Widget _controls() {
+    return ButtonBar(
+      children: [
+        ElevatedButton(
+            onPressed: () {
+              setState(() {
+                showHints = !showHints;
+              });
+            },
+            child: Text("Toggle Hints"))
+      ],
+    );
+  }
+
   Widget _gameArea() {
     return Column(
       children: [
@@ -104,10 +226,13 @@ class _BoardState extends State<BoardView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            _userSideSums(),
             _playingField(),
             _sideSums(),
           ],
         ),
+        _userBottomSums(),
+        _controls(),
       ],
     );
   }

@@ -1,17 +1,22 @@
 import 'package:flutter/cupertino.dart';
 
+import 'game.dart';
+
 class Tile {
   final int solutionValue;
+  final bool isSumTile;
+  final bool isBlank;
   final TextEditingController controller = TextEditingController();
-
-  bool isEditable;
   late int index;
 
-  late int? outputValue = isEditable ? int.tryParse(controller.text) ?? 0 : solutionValue;
-  int? playerGuess;
-  Tile(this.solutionValue, [this.isEditable = false]);
+  late int outputValue = isBlank ? 0 : solutionValue;
+  Tile(this.solutionValue, {this.index = -1, this.isBlank = false, this.isSumTile = false});
 
-  void makeEditable() {
-    this.isEditable = true;
+  int getCol(Game game) {
+    return index % game.boardSize;
+  }
+
+  int getRow(Game game) {
+    return (index / game.boardSize).floor();
   }
 }

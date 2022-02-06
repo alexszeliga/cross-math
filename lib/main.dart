@@ -32,11 +32,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<Widget> _body() {
-    return [
-      BoardView(
-        game: Game(),
-      )
-    ];
+    return [const BoardView()];
   }
 
   @override
