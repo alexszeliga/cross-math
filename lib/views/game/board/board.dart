@@ -26,9 +26,13 @@ class _BoardState extends State<BoardView> {
   late List<int> rowSolutions = [...rows.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
   late List<int> colSolutions = [...cols.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
   late bool taller = MediaQuery.of(context).size.height > MediaQuery.of(context).size.width;
-  late double cardWidth = taller
+  late double optimalWidth = taller
       ? (MediaQuery.of(context).size.width.toInt() / (game.boardSize + 2)).floor().toDouble()
       : (MediaQuery.of(context).size.height.toInt() / (game.boardSize + 2)).floor().toDouble();
+
+  late double cardWidth = optimalWidth > 100 ? 100 : optimalWidth;
+  late TextStyle defaultTextStyle =
+      cardWidth < 100 ? Theme.of(context).textTheme.headline4! : Theme.of(context).textTheme.headline3!;
   // List<int> getRowSolutions() {
   //   return [...rows.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
   // }
@@ -91,13 +95,13 @@ class _BoardState extends State<BoardView> {
           child: !tile.isBlank
               ? Text(
                   tile.solutionValue.toString(),
-                  style: Theme.of(context).textTheme.headline3,
+                  style: defaultTextStyle,
                 )
               : TextField(
                   controller: tile.controller,
                   onTap: () => print(tile.solutionValue),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headline3,
+                  style: defaultTextStyle,
                   onChanged: (s) {
                     setState(() {
                       tiles[tile.index].outputValue = int.tryParse(s) ?? 0;
@@ -123,7 +127,7 @@ class _BoardState extends State<BoardView> {
   }
 
   Widget solutionTile(int solution, int tally) {
-    TextStyle textStyle = Theme.of(context).textTheme.headline3!;
+    TextStyle textStyle = defaultTextStyle;
     if (solve) {
       textStyle = textStyle.apply(color: tally == solution ? Colors.green : Colors.red);
     }
@@ -143,7 +147,7 @@ class _BoardState extends State<BoardView> {
   }
 
   Widget answerTile(int solution, int guess) {
-    TextStyle textStyle = Theme.of(context).textTheme.headline3!;
+    TextStyle textStyle = defaultTextStyle;
 
     textStyle = textStyle.apply(
         color: guess == solution
