@@ -102,6 +102,7 @@ class _BoardState extends State<BoardView> {
                   onTap: () => print(tile.solutionValue),
                   textAlign: TextAlign.center,
                   style: defaultTextStyle,
+                  keyboardType: TextInputType.number,
                   onChanged: (s) {
                     setState(() {
                       tiles[tile.index].outputValue = int.tryParse(s) ?? 0;
