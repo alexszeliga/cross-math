@@ -16,6 +16,7 @@ class _BoardState extends State<BoardView> {
     for (int i = 0; i < game.tileCount; i++) Tile(Game.rng(), index: i, isBlank: blanks.contains(i))
   ];
   bool showHints = false;
+  bool solve = false;
 
   late List<List<Tile>> rows = getRowsFromTiles();
   late List<List<Tile>> cols = getColsFromTiles();
@@ -91,6 +92,7 @@ class _BoardState extends State<BoardView> {
                 )
               : TextField(
                   controller: tile.controller,
+                  onTap: () => print(tile.solutionValue),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headline3,
                   onChanged: (s) {
@@ -117,9 +119,11 @@ class _BoardState extends State<BoardView> {
     );
   }
 
-  Widget solutionTile(int solution) {
+  Widget solutionTile(int solution, int tally) {
     TextStyle textStyle = Theme.of(context).textTheme.headline3!;
-
+    if (solve) {
+      textStyle = textStyle.apply(color: tally == solution ? Colors.green : Colors.red);
+    }
     return SizedBox(
       width: 100,
       height: 100,
@@ -169,14 +173,14 @@ class _BoardState extends State<BoardView> {
 
   Widget _sideSums() {
     return Column(
-      children: [for (int sum in rowSolutions) solutionTile(sum)],
+      children: [for (int i = 0; i < rows.length; i++) solutionTile(rowSolutions[i], rowTotals[i])],
     );
   }
 
   Widget _topSums() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [for (int sum in colSolutions) solutionTile(sum)],
+      children: [for (int i = 0; i < cols.length; i++) solutionTile(colSolutions[i], colTotals[i])],
     );
   }
 
@@ -192,7 +196,7 @@ class _BoardState extends State<BoardView> {
 
   Widget _userBottomSums() {
     List<Widget> kids = [];
-    for (int i = 0; i < rows.length; i++) {
+    for (int i = 0; i < cols.length; i++) {
       kids.add(showHints ? answerTile(colSolutions[i], colTotals[i]) : blankTile());
     }
     return Row(
@@ -211,10 +215,17 @@ class _BoardState extends State<BoardView> {
         ElevatedButton(
             onPressed: () {
               setState(() {
-                showHints = !showHints;
+                showHints = true;
               });
             },
-            child: Text("Toggle Hints"))
+            child: const Text("Toggle Hints")),
+        ElevatedButton(
+            onPressed: () {
+              setState(() {
+                solve = true;
+              });
+            },
+            child: const Text("Solve"))
       ],
     );
   }
