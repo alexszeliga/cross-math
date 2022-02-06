@@ -25,7 +25,10 @@ class _BoardState extends State<BoardView> {
   late List<int> colTotals = [...cols.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
   late List<int> rowSolutions = [...rows.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
   late List<int> colSolutions = [...cols.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
-
+  late bool taller = MediaQuery.of(context).size.height > MediaQuery.of(context).size.width;
+  late double cardWidth = taller
+      ? (MediaQuery.of(context).size.width.toInt() / (game.boardSize + 2)).floor().toDouble()
+      : (MediaQuery.of(context).size.height.toInt() / (game.boardSize + 2)).floor().toDouble();
   // List<int> getRowSolutions() {
   //   return [...rows.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
   // }
@@ -80,8 +83,8 @@ class _BoardState extends State<BoardView> {
 
   Widget tileWidget(Tile tile) {
     return SizedBox(
-      width: 100,
-      height: 100,
+      width: cardWidth,
+      height: cardWidth,
       child: Card(
         margin: const EdgeInsets.all(8),
         child: Center(
@@ -113,9 +116,9 @@ class _BoardState extends State<BoardView> {
   }
 
   Widget blankTile() {
-    return const SizedBox(
-      width: 100,
-      height: 100,
+    return SizedBox(
+      width: cardWidth,
+      height: cardWidth,
     );
   }
 
@@ -125,8 +128,8 @@ class _BoardState extends State<BoardView> {
       textStyle = textStyle.apply(color: tally == solution ? Colors.green : Colors.red);
     }
     return SizedBox(
-      width: 100,
-      height: 100,
+      width: cardWidth,
+      height: cardWidth,
       child: Card(
         margin: const EdgeInsets.all(8),
         child: Center(
@@ -150,8 +153,8 @@ class _BoardState extends State<BoardView> {
                 : Colors.red);
 
     return SizedBox(
-      width: 100,
-      height: 100,
+      width: cardWidth,
+      height: cardWidth,
       child: Card(
         margin: const EdgeInsets.all(8),
         child: Center(
