@@ -10,6 +10,7 @@ class BoardView extends StatefulWidget {
 }
 
 class _BoardState extends State<BoardView> {
+  final FocusNode focusNode = FocusNode();
   late Game game = Game();
   late List<int> blanks = game.blankIndexes();
   late List<Tile> tiles = [
@@ -99,7 +100,11 @@ class _BoardState extends State<BoardView> {
                 )
               : TextField(
                   controller: tile.controller,
-                  onTap: () => print(tile.solutionValue),
+                  focusNode: focusNode,
+                  onTap: () {
+                    print(tile.solutionValue);
+                    focusNode.requestFocus();
+                  },
                   textAlign: TextAlign.center,
                   style: defaultTextStyle,
                   keyboardType: TextInputType.number,
