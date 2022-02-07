@@ -10,7 +10,6 @@ class BoardView extends StatefulWidget {
 }
 
 class _BoardState extends State<BoardView> {
-  final FocusNode focusNode = FocusNode();
   late Game game = Game();
   late List<int> blanks = game.blankIndexes();
   late List<Tile> tiles = [
@@ -34,34 +33,11 @@ class _BoardState extends State<BoardView> {
   late double cardWidth = optimalWidth > 100 ? 100 : optimalWidth;
   late TextStyle defaultTextStyle =
       cardWidth < 100 ? Theme.of(context).textTheme.headline4! : Theme.of(context).textTheme.headline3!;
-  // List<int> getRowSolutions() {
-  //   return [...rows.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
-  // }
-
-  // List<int> getColSolutions() {
-  //   return [...cols.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
-  // }
-
-  // List<int> getRowTotals() {
-  //   return [...rows.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
-  // }
-
-  // List<int> getColTotals() {
-  //   return [...cols.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
-  // }
 
   List<List<Tile>> getRowsFromTiles() {
-    List<List<Tile>> output = [];
-    int o = 0;
-    while (o < game.tileCount) {
-      List<Tile> row = [];
-      for (int i = 0; i < game.boardSize; i++) {
-        row.add(tiles[o]);
-        o++;
-      }
-      output.add(row);
-    }
-    return output;
+    return [
+      for (int o = 0; o < game.tileCount;) [for (int i = 0; i < game.boardSize; i++) tiles[o]]
+    ];
   }
 
   List<List<Tile>> getColsFromTiles() {
@@ -100,10 +76,10 @@ class _BoardState extends State<BoardView> {
                 )
               : TextField(
                   controller: tile.controller,
-                  focusNode: focusNode,
+                  focusNode: tile.focusNode,
                   onTap: () {
                     print(tile.solutionValue);
-                    focusNode.requestFocus();
+                    tile.focusNode.requestFocus();
                   },
                   textAlign: TextAlign.center,
                   style: defaultTextStyle,

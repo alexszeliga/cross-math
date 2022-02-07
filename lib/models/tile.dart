@@ -7,6 +7,7 @@ class Tile {
   final bool isSumTile;
   final bool isBlank;
   final TextEditingController controller = TextEditingController();
+  final FocusNode focusNode = FocusNode();
   late int index;
 
   late int outputValue = isBlank ? 0 : solutionValue;
