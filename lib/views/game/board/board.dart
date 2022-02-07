@@ -10,21 +10,22 @@ class BoardView extends StatefulWidget {
 }
 
 class _BoardState extends State<BoardView> {
+  /* 
+    STATE!
+  */
   late Game game = Game();
   late List<int> blanks = game.blankIndexes();
-  late List<Tile> tiles = [
-    for (int i = 0; i < game.tileCount; i++) Tile(Game.rng(), index: i, isBlank: blanks.contains(i))
-  ];
+  late List<Tile> tiles;
   bool showHints = false;
-  bool solve = false;
+  bool solved = false;
 
-  late List<List<Tile>> rows = getRowsFromTiles();
-  late List<List<Tile>> cols = getColsFromTiles();
+  late List<List<Tile>> rows;
+  late List<List<Tile>> cols;
 
-  late List<int> rowTotals = [...rows.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
-  late List<int> colTotals = [...cols.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
-  late List<int> rowSolutions = [...rows.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
-  late List<int> colSolutions = [...cols.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
+  late List<int> rowTotals;
+  late List<int> colTotals;
+  late List<int> rowSolutions;
+  late List<int> colSolutions;
   late bool taller = MediaQuery.of(context).size.height > MediaQuery.of(context).size.width;
   late double optimalWidth = taller
       ? (MediaQuery.of(context).size.width.toInt() / (game.boardSize + 2)).floor().toDouble()
@@ -34,23 +35,56 @@ class _BoardState extends State<BoardView> {
   late TextStyle defaultTextStyle =
       cardWidth < 100 ? Theme.of(context).textTheme.headline4! : Theme.of(context).textTheme.headline3!;
 
-  List<List<Tile>> getRowsFromTiles() {
-    return [
-      for (int o = 0; o < game.tileCount; o += game.boardSize) [for (int i = 0; i < game.boardSize; i++) tiles[o]]
-    ];
+  /* 
+    OVERRIDES!
+  */
+  @override
+  void initState() {
+    super.initState();
+    _generateTiles();
   }
 
-  List<List<Tile>> getColsFromTiles() {
-    List<List<Tile>> output = [];
-    for (int i = 0; i < game.boardSize; i++) {
-      List<Tile> col = [];
-      for (int j = 0; j < game.tileCount; j += game.boardSize) {
-        col.add(tiles[j + i]);
-      }
-      output.add(col);
-    }
-    return output;
+  @override
+  Widget build(BuildContext context) {
+    return _gameArea();
   }
+  /* 
+    METHODS!
+  */
+
+  void _updateTile(Tile tile, String input) {
+    setState(() {
+      tiles[tile.index].outputValue = int.tryParse(input) ?? 0;
+    });
+    _tallyBoard();
+  }
+
+  void _tallyBoard() {
+    setState(() {
+      cols = [
+        for (int colOffset = 0; colOffset < game.boardSize; colOffset++)
+          [for (int i = 0; i < game.tileCount; i += game.boardSize) tiles[i + colOffset]]
+      ];
+      rows = [
+        for (int o = 0; o < game.tileCount; o += game.boardSize) [for (int i = 0; i < game.boardSize; i++) tiles[o + i]]
+      ];
+      rowTotals = [...rows.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
+      colTotals = [...cols.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
+      rowSolutions = [...rows.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
+      colSolutions = [...cols.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
+    });
+  }
+
+  void _generateTiles() {
+    setState(() {
+      tiles = [for (int i = 0; i < game.tileCount; i++) Tile(Game.rng(), index: i, isBlank: blanks.contains(i))];
+    });
+    _tallyBoard();
+  }
+
+  /* 
+    WIDGETS!
+  */
 
   Widget _row([int offset = 0]) {
     List<Widget> cards = [];
@@ -84,16 +118,10 @@ class _BoardState extends State<BoardView> {
                   textAlign: TextAlign.center,
                   style: defaultTextStyle,
                   keyboardType: TextInputType.number,
-                  onChanged: (s) {
-                    setState(() {
-                      tiles[tile.index].outputValue = int.tryParse(s) ?? 0;
-                      cols = getColsFromTiles();
-                      rows = getRowsFromTiles();
-                      rowTotals = [...rows.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
-                      colTotals = [...cols.map((l) => l.fold(0, (p, t) => p + t.outputValue))];
-                      rowSolutions = [...rows.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
-                      colSolutions = [...cols.map((l) => l.fold(0, (p, t) => p + t.solutionValue))];
-                    });
+                  onChanged: (input) {
+                    if (!solved) {
+                      _updateTile(tile, input);
+                    }
                   },
                 ),
         ),
@@ -110,7 +138,7 @@ class _BoardState extends State<BoardView> {
 
   Widget solutionTile(int solution, int tally) {
     TextStyle textStyle = defaultTextStyle;
-    if (solve) {
+    if (solved) {
       textStyle = textStyle.apply(color: tally == solution ? Colors.green : Colors.red);
     }
     return SizedBox(
@@ -201,20 +229,31 @@ class _BoardState extends State<BoardView> {
   Widget _controls() {
     return ButtonBar(
       children: [
-        ElevatedButton(
-            onPressed: () {
-              setState(() {
-                showHints = true;
-              });
-            },
-            child: const Text("Toggle Hints")),
-        ElevatedButton(
-            onPressed: () {
-              setState(() {
-                solve = true;
-              });
-            },
-            child: const Text("Solve"))
+        if (!showHints)
+          ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  showHints = true;
+                });
+              },
+              child: const Text("Toggle Hints")),
+        !solved
+            ? ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    solved = true;
+                  });
+                },
+                child: const Text("Solve"))
+            : ElevatedButton(
+                onPressed: () {
+                  _generateTiles();
+                  setState(() {
+                    showHints = false;
+                    solved = false;
+                  });
+                },
+                child: const Text("New Game"))
       ],
     );
   }
@@ -235,10 +274,5 @@ class _BoardState extends State<BoardView> {
         _controls(),
       ],
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _gameArea();
   }
 }
