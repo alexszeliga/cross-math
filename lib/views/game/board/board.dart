@@ -36,7 +36,7 @@ class _BoardState extends State<BoardView> {
 
   List<List<Tile>> getRowsFromTiles() {
     return [
-      for (int o = 0; o < game.tileCount;) [for (int i = 0; i < game.boardSize; i++) tiles[o]]
+      for (int o = 0; o < game.tileCount; o += game.boardSize) [for (int i = 0; i < game.boardSize; i++) tiles[o]]
     ];
   }
 
