@@ -33,7 +33,7 @@ class _BoardState extends State<BoardView> {
 
   late double cardWidth = optimalWidth > 100 ? 100 : optimalWidth;
   late TextStyle defaultTextStyle =
-      cardWidth < 100 ? Theme.of(context).textTheme.headline4! : Theme.of(context).textTheme.headline3!;
+      cardWidth < 100 ? Theme.of(context).textTheme.headline6! : Theme.of(context).textTheme.headline3!;
 
   /* 
     OVERRIDES!
