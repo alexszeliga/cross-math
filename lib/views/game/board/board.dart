@@ -130,6 +130,7 @@ class _BoardState extends State<BoardView> {
       width: cardWidth,
       height: cardWidth,
       child: Card(
+        color: tile.isBlank ? Colors.white : Colors.white70,
         margin: const EdgeInsets.all(8),
         child: Center(
           child: !tile.isBlank
@@ -138,6 +139,7 @@ class _BoardState extends State<BoardView> {
                   style: defaultTextStyle,
                 )
               : TextField(
+                  decoration: const InputDecoration(hintText: "?", hintStyle: TextStyle(color: Colors.black26)),
                   controller: tile.controller,
                   focusNode: tile.focusNode,
                   onTap: () {
@@ -273,18 +275,15 @@ class _BoardState extends State<BoardView> {
             !solved
                 ? ElevatedButton(
                     onPressed: () {
+                      if (_timer.isActive) _timer.cancel();
                       setState(() {
                         solved = true;
                       });
                     },
                     child: const Text("Solve"))
                 : ElevatedButton(
-                    onPressed: () {
-                      _generateTiles();
-                      setState(() {
-                        showHints = false;
-                        solved = false;
-                      });
+                    onPressed: () async {
+                      Navigator.pop(context);
                     },
                     child: const Text("New Game"))
           ],
