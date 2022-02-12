@@ -16,10 +16,22 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      routes: {
-        "/": (context) => const TitlePageView(),
-        "/board": (context) => const BoardView(),
-        // '/end' :
+      // routes: {
+      //   "/": (context) => const TitlePageView(),
+      //   "/board": (context) => const BoardView(),
+      //   // '/end' :
+      // },
+      initialRoute: '/',
+      onGenerateRoute: (settings) {
+        Map<String, dynamic>? args = settings.arguments as Map<String, dynamic>?;
+        Map<String, Widget Function(BuildContext)> _routes = {
+          '/': (context) => const TitlePageView(),
+          "/board": (context) => BoardView(
+                blanks: args?["blanks"],
+                boardSize: args?["boardSize"],
+              ),
+        };
+        return MaterialPageRoute(builder: _routes[settings.name]!);
       },
     );
   }

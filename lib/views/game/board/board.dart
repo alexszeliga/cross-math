@@ -1,25 +1,34 @@
+import 'dart:async';
+
 import 'package:cross_math/models/game.dart';
 import 'package:cross_math/models/tile.dart';
 import 'package:cross_math/widgets/game_scaffold.dart';
 import 'package:flutter/material.dart';
 
 class BoardView extends StatefulWidget {
-  const BoardView({Key? key}) : super(key: key);
+  final int blanks;
+  final int boardSize;
+  const BoardView({
+    Key? key,
+    required this.blanks,
+    required this.boardSize,
+  }) : super(key: key);
 
   @override
   _BoardState createState() => _BoardState();
 }
 
 class _BoardState extends State<BoardView> {
-  /* 
+  /*
     STATE!
   */
-  late Game game = Game();
+  late Game game = Game(widget.boardSize, widget.blanks);
   late List<int> blanks = game.blankIndexes();
   late List<Tile> tiles;
   bool showHints = false;
   bool solved = false;
-
+  late Timer _timer;
+  String timeFormatted = "0";
   late List<List<Tile>> rows;
   late List<List<Tile>> cols;
 
@@ -43,6 +52,7 @@ class _BoardState extends State<BoardView> {
   void initState() {
     super.initState();
     _generateTiles();
+    _startTimer();
   }
 
   @override
@@ -50,8 +60,13 @@ class _BoardState extends State<BoardView> {
     // return _gameArea();
     return GameScaffold(
       body: _gameArea(),
-      title: "superfun_01",
     );
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
   /* 
     METHODS!
@@ -85,6 +100,15 @@ class _BoardState extends State<BoardView> {
       tiles = [for (int i = 0; i < game.tileCount; i++) Tile(Game.rng(), index: i, isBlank: blanks.contains(i))];
     });
     _tallyBoard();
+  }
+
+  void _startTimer() {
+    const oneSec = const Duration(seconds: 1);
+    _timer = Timer.periodic(oneSec, (timer) {
+      setState(() {
+        timeFormatted = timer.tick.toString();
+      });
+    });
   }
 
   /* 
@@ -235,6 +259,7 @@ class _BoardState extends State<BoardView> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        Text("Seconds elapsed: $timeFormatted"),
         ButtonBar(
           children: [
             if (!showHints)

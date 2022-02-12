@@ -8,21 +8,85 @@ class TitlePageView extends StatefulWidget {
   _TitlePageViewState createState() => _TitlePageViewState();
 }
 
-Widget _titlePage(BuildContext context) {
-  return Column(
-    children: [
-      const Text("hello!"),
-      TextButton(onPressed: () => Navigator.pushNamed(context, '/board'), child: const Text("Hello!"))
-    ],
-  );
-}
-
 class _TitlePageViewState extends State<TitlePageView> {
+  int difficultySettingInt = 2;
+  String difficultyName = "Normal";
+
+  Widget _difficultySelect() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Radio(
+                value: 1,
+                groupValue: difficultySettingInt,
+                onChanged: (int? v) {
+                  setState(() {
+                    difficultyName = "Easy";
+                    difficultySettingInt = v!;
+                  });
+                }),
+            const Text("Easy")
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Radio(
+                value: 2,
+                groupValue: difficultySettingInt,
+                onChanged: (int? v) {
+                  setState(() {
+                    difficultyName = "Normal";
+                    difficultySettingInt = v!;
+                  });
+                }),
+            const Text("Noarmal")
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Radio(
+                value: 3,
+                groupValue: difficultySettingInt,
+                onChanged: (int? v) {
+                  setState(() {
+                    difficultyName = "Hard";
+                    difficultySettingInt = v!;
+                  });
+                }),
+            const Text("Hard")
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _titlePage() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _difficultySelect(),
+        ElevatedButton(
+            onPressed: () => Navigator.pushNamed(
+                  context,
+                  '/board',
+                  arguments: {
+                    "boardSize": 5,
+                    "blanks": difficultySettingInt,
+                  },
+                ),
+            child: const Text("Start!"))
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GameScaffold(
-      title: "superfun_01 title page",
-      body: _titlePage(context),
+      body: _titlePage(),
     );
   }
 }

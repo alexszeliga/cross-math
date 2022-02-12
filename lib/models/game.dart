@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:cross_math/models/tile.dart';
 
 class Game {
+  final int boardSize;
+  final int blanksPerRow;
+  Game([this.boardSize = 5, this.blanksPerRow = 2]);
   static const int dimensions = 2;
-  final int boardSize = 5;
-  final int blanksPerRow = 3;
+
   late int tileCount = pow(boardSize, Game.dimensions).toInt();
   static int rng() => Random().nextInt(9) + 1;
   List<int> blankIndexes() {
