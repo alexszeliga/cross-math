@@ -1,5 +1,6 @@
 import 'package:cross_math/models/game.dart';
 import 'package:cross_math/models/tile.dart';
+import 'package:cross_math/widgets/game_scaffold.dart';
 import 'package:flutter/material.dart';
 
 class BoardView extends StatefulWidget {
@@ -46,7 +47,11 @@ class _BoardState extends State<BoardView> {
 
   @override
   Widget build(BuildContext context) {
-    return _gameArea();
+    // return _gameArea();
+    return GameScaffold(
+      body: _gameArea(),
+      title: "superfun_01",
+    );
   }
   /* 
     METHODS!
@@ -264,23 +269,21 @@ class _BoardState extends State<BoardView> {
   }
 
   Widget _gameArea() {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _topSums(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _userSideSums(),
-              _playingField(),
-              _sideSums(),
-            ],
-          ),
-          _userBottomSums(),
-          _controls(),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _topSums(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _userSideSums(),
+            _playingField(),
+            _sideSums(),
+          ],
+        ),
+        _userBottomSums(),
+        _controls(),
+      ],
     );
   }
 }

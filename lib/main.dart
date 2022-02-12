@@ -1,7 +1,6 @@
 import 'package:cross_math/views/game/board/board.dart';
+import 'package:cross_math/views/game/title_page/title_page.dart';
 import 'package:flutter/material.dart';
-
-import 'models/game.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,36 +16,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Cross-Math'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  List<Widget> _body() {
-    return [const BoardView()];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: _body(),
-        ),
-      ),
+      routes: {
+        "/": (context) => const TitlePageView(),
+        "/board": (context) => const BoardView(),
+        // '/end' :
+      },
     );
   }
 }
