@@ -227,52 +227,60 @@ class _BoardState extends State<BoardView> {
   }
 
   Widget _controls() {
-    return ButtonBar(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (!showHints)
-          ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  showHints = true;
-                });
-              },
-              child: const Text("Toggle Hints")),
-        !solved
-            ? ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    solved = true;
-                  });
-                },
-                child: const Text("Solve"))
-            : ElevatedButton(
-                onPressed: () {
-                  _generateTiles();
-                  setState(() {
-                    showHints = false;
-                    solved = false;
-                  });
-                },
-                child: const Text("New Game"))
+        ButtonBar(
+          children: [
+            if (!showHints)
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      showHints = true;
+                    });
+                  },
+                  child: const Text("Toggle Hints")),
+            !solved
+                ? ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        solved = true;
+                      });
+                    },
+                    child: const Text("Solve"))
+                : ElevatedButton(
+                    onPressed: () {
+                      _generateTiles();
+                      setState(() {
+                        showHints = false;
+                        solved = false;
+                      });
+                    },
+                    child: const Text("New Game"))
+          ],
+        ),
       ],
     );
   }
 
   Widget _gameArea() {
-    return Column(
-      children: [
-        _topSums(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _userSideSums(),
-            _playingField(),
-            _sideSums(),
-          ],
-        ),
-        _userBottomSums(),
-        _controls(),
-      ],
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _topSums(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _userSideSums(),
+              _playingField(),
+              _sideSums(),
+            ],
+          ),
+          _userBottomSums(),
+          _controls(),
+        ],
+      ),
     );
   }
 }
