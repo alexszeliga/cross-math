@@ -42,7 +42,7 @@ class _TitlePageViewState extends State<TitlePageView> {
                     difficultySettingInt = v!;
                   });
                 }),
-            const Text("Noarmal")
+            const Text("Normal")
           ],
         ),
         Row(
